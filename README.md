@@ -1,11 +1,9 @@
 # Event Scheduling & Resource Allocation System
-
 A web application built with Python, Flask, and MySQL to manage events, allocate resources, and automatically detect scheduling conflicts. It includes a dark-themed UI and role-based access for different types of users.
 
 [Watch the Demo Video](https://drive.google.com/file/d/154w41FlCGjsuzQDUIkQSH6DgRGflfgLw/view?usp=drive_link)
 
 ## Features
-
 * **Role-Based Access:** Secure login with `admin`, `organizer`, and `viewer` roles.
 * **Event & Resource Management:** Full CRUD operations for events, rooms, instructors, and equipment.
 * **Conflict Detection:** Automatically prevents overlapping times and room capacity issues.
@@ -15,20 +13,29 @@ A web application built with Python, Flask, and MySQL to manage events, allocate
 * **REST API:** Complete JSON API for backend operations.
 * **Error Handling:** Custom 404 and 403 pages.
 
-**Tech Stack:** * **Backend:** Python, Flask, Flask Sessions, Werkzeug
+**Tech Stack:**
+* **Backend:** Python, Flask, Flask Sessions, Werkzeug
 * **Database:** MySQL
 * **Frontend:** HTML, CSS, Jinja2
 * **Deployment:** Docker, Docker Compose
 
 ## How It Works
 
-Here is a quick rundown of the app's flow:
+1. **Login** — Open the app and log in. Your role (Admin, Organizer, or Viewer) decides what you can do.
 
-1. **Setup:** An `admin` logs in first to add resources into the system (like conference rooms, projectors, or guest speakers).
-2. **Booking:** An `organizer` logs in, picks a date and time, and tries to book a room for an event.
-3. **The Conflict Check:** Before saving, the app double-checks if that room or equipment is already taken. If it is, it throws an error and makes the user pick another time. If it's free, the event is saved to the database.
-4. **Viewing the Schedule:** Users can pull up the weekly calendar view to easily see what is booked and what is available.
-5. **Admin Tracking:** Admins can download CSV reports to see how often certain rooms are being used, or check the audit logs to see exactly who did what.
+2. **Add Resources** — Admin adds things that can be booked, like rooms, projectors, or instructors.
+
+3. **Create an Event** — Organizer creates an event with a name, date, and time.
+
+4. **Book a Resource** — Organizer picks a resource for that event. The app automatically checks if it is free at that time, has enough capacity, and enough units available. If something is wrong, it shows an error. If all is good, it is saved.
+
+5. **View the Calendar** — Anyone can open the calendar to see what is scheduled for the week.
+
+6. **Download Reports** — Admin can download a CSV to see how often each resource is being used.
+
+7. **Check Audit Logs** — Admin can see a full history of who did what inside the app.
+
+8. **Settings** — Every user can update their profile and password. Admin can also change the timezone and date format for the app.
 
 ## Screenshots
 
@@ -66,12 +73,10 @@ Make sure you have Python 3.x and MySQL installed on your system.
 
 ### 2. Installation
 Clone the repository and set up a virtual environment:
-
 ```bash
-git clone [https://github.com/Sachin1043/event-scheduling-system.git](https://github.com/Sachin1043/event-scheduling-system.git)
+git clone https://github.com/Sachin1043/event-scheduling-system.git
 cd event-scheduling-system
-
 python -m venv venv
 venv\Scripts\activate # On Mac/Linux use: source venv/bin/activate
-
 pip install -r requirements.txt
+```
