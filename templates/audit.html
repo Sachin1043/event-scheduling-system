@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">Audit Log</div>
+    <div class="page-subtitle">Last 200 actions</div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>ID</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="white-space:nowrap;color:var(--text-muted);font-size:12px">
+                    {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                </td>
+                <td>{{ log.username or 'System' }}</td>
+                <td>
+                    <span class="badge
+                        {% if 'delete' in log.action %}badge-admin
+                        {% elif 'create' in log.action %}badge-active
+                        {% elif 'update' in log.action %}badge-organizer
+                        {% else %}badge-viewer{% endif %}">
+                        {{ log.action }}
+                    </span>
+                </td>
+                <td>{{ log.entity_type }}</td>
+                <td style="color:var(--text-muted)">{{ log.entity_id or '—' }}</td>
+                <td style="font-size:12px;color:var(--text-muted);max-width:200px;
+                           overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                    {{ log.details or '—' }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128221;</div>
+                        <h3>No audit logs yet</h3>
+                        <p>Actions will appear here as users interact with the system.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

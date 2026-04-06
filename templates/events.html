@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">Events</div>
+    {% if current_user()['role'] in ['admin','organizer'] %}
+    <a href="{{ url_for('create_event_route') }}" class="btn btn-primary">
+        + New Event
+    </a>
+    {% endif %}
+</div>
+
+<form class="search-bar" method="GET" action="{{ url_for('events') }}">
+    <input type="text" name="q" placeholder="Search events..."
+           value="{{ search }}">
+    <button type="submit" class="btn btn-ghost">Search</button>
+    {% if search %}
+    <a href="{{ url_for('events') }}" class="btn btn-ghost">Clear</a>
+    {% endif %}
+</form>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Timezone</th>
+                    <th>Created By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for event in events %}
+            <tr>
+                <td class="primary">
+                    <a href="{{ url_for('event_detail', event_id=event.id) }}">
+                        {{ event.title }}
+                    </a>
+                </td>
+                <td>{{ event.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ event.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ event.timezone }}</td>
+                <td>{{ event.creator_name }}</td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{{ url_for('event_detail', event_id=event.id) }}"
+                           class="btn btn-ghost btn-sm">View</a>
+                        {% if current_user()['role'] in ['admin','organizer'] %}
+                        <a href="{{ url_for('edit_event', event_id=event.id) }}"
+                           class="btn btn-ghost btn-sm">Edit</a>
+                        {% endif %}
+                        {% if current_user()['role'] == 'admin' %}
+                        <form method="POST"
+                              action="{{ url_for('delete_event_route', event_id=event.id) }}">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Delete this event?')">
+                                Delete
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128203;</div>
+                        <h3>No events found</h3>
+                        <p>
+                            {% if search %}
+                                No results for "{{ search }}".
+                            {% else %}
+                                No events have been created yet.
+                            {% endif %}
+                        </p>
+                        {% if current_user()['role'] in ['admin','organizer'] %}
+                        <a href="{{ url_for('create_event_route') }}"
+                           class="btn btn-primary">Create Event</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <div class="page-title">{{ event.title }}</div>
+        <div class="page-subtitle">Created by {{ event.creator_name }}</div>
+    </div>
+    <div class="btn-group">
+        {% if current_user()['role'] in ['admin','organizer'] %}
+        <a href="{{ url_for('edit_event', event_id=event.id) }}"
+           class="btn btn-ghost">Edit</a>
+        {% endif %}
+        {% if current_user()['role'] == 'admin' %}
+        <form method="POST"
+              action="{{ url_for('delete_event_route', event_id=event.id) }}">
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Delete this event permanently?')">
+                Delete
+            </button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('events') }}" class="btn btn-ghost">Back</a>
+    </div>
+</div>
+
+<!-- Event Info -->
+<div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+        <span class="card-title">Event Details</span>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div>
+                <div class="form-group" style="margin-bottom:10px">
+                    <label style="color:var(--text-muted);font-size:11px;
+                                  text-transform:uppercase;letter-spacing:0.5px">
+                        Start Time
+                    </label>
+                    <div style="font-size:15px;font-weight:500">
+                        {{ event.start_time.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:10px">
+                    <label style="color:var(--text-muted);font-size:11px;
+                                  text-transform:uppercase;letter-spacing:0.5px">
+                        End Time
+                    </label>
+                    <div style="font-size:15px;font-weight:500">
+                        {{ event.end_time.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="form-group" style="margin-bottom:10px">
+                    <label style="color:var(--text-muted);font-size:11px;
+                                  text-transform:uppercase;letter-spacing:0.5px">
+                        Timezone
+                    </label>
+                    <div style="font-size:15px;font-weight:500">
+                        {{ event.timezone }}
+                    </div>
+                </div>
+                {% if event.description %}
+                <div class="form-group">
+                    <label style="color:var(--text-muted);font-size:11px;
+                                  text-transform:uppercase;letter-spacing:0.5px">
+                        Description
+                    </label>
+                    <div style="font-size:14px;color:var(--text-muted)">
+                        {{ event.description }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Allocated Resources -->
+<div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+        <span class="card-title">
+            Allocated Resources ({{ allocations|length }})
+        </span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Resource</th>
+                    <th>Type</th>
+                    <th>Quantity / Units</th>
+                    <th>Attendees</th>
+                    <th>Notes</th>
+                    {% if current_user()['role'] in ['admin','organizer'] %}
+                    <th>Action</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for a in allocations %}
+            <tr>
+                <td class="primary">{{ a.resource_name }}</td>
+                <td>
+                    <span class="badge badge-{{ a.resource_type }}">
+                        {{ a.resource_type }}
+                    </span>
+                </td>
+                <td>{{ a.quantity_needed }}</td>
+                <td>{{ a.attendees_count }}</td>
+                <td style="color:var(--text-muted)">{{ a.notes or '—' }}</td>
+                {% if current_user()['role'] in ['admin','organizer'] %}
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('delete_allocation_route', alloc_id=a.id) }}">
+                        <input type="hidden" name="event_id" value="{{ event.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Remove this allocation?')">
+                            Remove
+                        </button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state" style="padding:24px">
+                        <p>No resources allocated yet.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Allocate Resource Form -->
+{% if current_user()['role'] in ['admin','organizer'] %}
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Allocate a Resource</span>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('create_allocation_route') }}">
+            <input type="hidden" name="event_id" value="{{ event.id }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="resource_id">Resource *</label>
+                    <select id="resource_id" name="resource_id" required>
+                        <option value="">-- Select Resource --</option>
+                        {% for r in resources %}
+                        {% if r.is_active %}
+                        <option value="{{ r.id }}">
+                            {{ r.name }} ({{ r.resource_type }},
+                            capacity: {{ r.capacity }})
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="attendees_count">Attendees Count</label>
+                    <input type="number" id="attendees_count"
+                           name="attendees_count" value="1" min="1">
+                    <div class="form-hint">For room capacity check</div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="quantity_needed">Quantity Needed</label>
+                    <input type="number" id="quantity_needed"
+                           name="quantity_needed" value="1" min="1">
+                    <div class="form-hint">For equipment quantity check</div>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <input type="text" id="notes" name="notes"
+                           placeholder="Optional notes">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">
+                Allocate Resource
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

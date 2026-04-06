@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Utilisation Report{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">Utilisation Report</div>
+    {% if current_user()['role'] in ['admin','organizer'] %}
+    <a href="{{ url_for('export_csv', start_date=start_date, end_date=end_date) }}"
+       class="btn btn-success">
+        Export CSV
+    </a>
+    {% endif %}
+</div>
+
+<!-- Date Filter -->
+<div class="report-filter">
+    <form method="GET" action="{{ url_for('report') }}"
+          style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;width:100%">
+        <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" name="start_date" value="{{ start_date }}">
+        </div>
+        <div class="form-group">
+            <label>End Date</label>
+            <input type="date" name="end_date" value="{{ end_date }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Apply Filter</button>
+    </form>
+</div>
+
+<!-- Report Table -->
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Resource</th>
+                    <th>Type</th>
+                    <th>Capacity</th>
+                    <th>Events</th>
+                    <th>Total Hours</th>
+                    <th>Utilisation</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in report %}
+            <tr>
+                <td class="primary">{{ row.name }}</td>
+                <td>
+                    <span class="badge badge-{{ row.resource_type }}">
+                        {{ row.resource_type }}
+                    </span>
+                </td>
+                <td>{{ row.capacity }}</td>
+                <td>{{ row.event_count }}</td>
+                <td>{{ row.total_hours }}h</td>
+                <td style="min-width:160px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <div class="utilisation-bar" style="flex:1">
+                            <div class="utilisation-fill
+                                {% if row.utilisation_pct >= 75 %}high
+                                {% elif row.utilisation_pct >= 40 %}medium
+                                {% else %}low{% endif %}"
+                                style="width:{{ [row.utilisation_pct, 100]|min }}%">
+                            </div>
+                        </div>
+                        <span style="font-size:12px;font-weight:600;
+                                     min-width:38px;text-align:right">
+                            {{ row.utilisation_pct }}%
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128202;</div>
+                        <h3>No data for this period</h3>
+                        <p>Try adjusting the date range.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

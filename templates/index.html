@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">Welcome back, {{ current_user()['username'] }}</div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <div class="stat-label">Total Events</div>
+        <div class="stat-value">{{ stats.total_events }}</div>
+        <div class="stat-desc">All scheduled events</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Total Resources</div>
+        <div class="stat-value">{{ stats.total_resources }}</div>
+        <div class="stat-desc">Rooms, instructors, equipment</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-label">Allocations</div>
+        <div class="stat-value">{{ stats.total_allocations }}</div>
+        <div class="stat-desc">Resource assignments</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-label">Upcoming Events</div>
+        <div class="stat-value">{{ stats.upcoming_events }}</div>
+        <div class="stat-desc">Scheduled from today</div>
+    </div>
+</div>
+
+<!-- Upcoming Events -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Upcoming Events</span>
+        <a href="{{ url_for('events') }}" class="btn btn-ghost btn-sm">View All</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Created By</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for event in upcoming %}
+            <tr>
+                <td class="primary">{{ event.title }}</td>
+                <td>{{ event.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ event.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ event.creator_name }}</td>
+                <td>
+                    <a href="{{ url_for('event_detail', event_id=event.id) }}"
+                       class="btn btn-ghost btn-sm">View</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128197;</div>
+                        <h3>No upcoming events</h3>
+                        <p>Create your first event to get started.</p>
+                        {% if current_user()['role'] in ['admin','organizer'] %}
+                        <a href="{{ url_for('create_event_route') }}"
+                           class="btn btn-primary">Create Event</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

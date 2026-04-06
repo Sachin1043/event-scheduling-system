@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — EventScheduler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <h1>EventScheduler</h1>
+            <p>Event Scheduling & Resource Allocation</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="flash {{ category }}" style="margin-bottom:12px">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email"
+                       placeholder="you@example.com" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password"
+                       placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary"
+                    style="width:100%;justify-content:center;margin-top:4px">
+                Sign In
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Register here</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

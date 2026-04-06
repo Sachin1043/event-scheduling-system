@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Event Scheduler{% endblock %} — EventScheduler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <span class="navbar-brand">Event<span>Scheduler</span></span>
+    <div class="navbar-right">
+        {% if current_user() %}
+            <span>{{ current_user()['username'] }}</span>
+            <span class="role-badge">{{ current_user()['role'] }}</span>
+            <button class="tour-trigger-btn" id="tourTriggerBtn" title="App Tour" onclick="startAppTour()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Sidebar -->
+{% if current_user() %}
+<aside class="sidebar">
+    <div class="sidebar-section">Main</div>
+    <a href="{{ url_for('dashboard') }}" id="tour-nav-dashboard"
+       class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+        <span class="sidebar-icon">&#9632;</span> Dashboard
+    </a>
+    <a href="{{ url_for('events') }}" id="tour-nav-events"
+       class="{% if request.endpoint in ['events','event_detail','create_event_route','edit_event'] %}active{% endif %}">
+        <span class="sidebar-icon">&#128203;</span> Events
+    </a>
+    <a href="{{ url_for('calendar') }}" id="tour-nav-calendar"
+       class="{% if request.endpoint == 'calendar' %}active{% endif %}">
+        <span class="sidebar-icon">&#128197;</span> Calendar
+    </a>
+    <a href="{{ url_for('resources') }}" id="tour-nav-resources"
+       class="{% if request.endpoint in ['resources','create_resource_route','edit_resource','deleted_resources'] %}active{% endif %}">
+        <span class="sidebar-icon">&#128218;</span> Resources
+    </a>
+    <a href="{{ url_for('allocations') }}" id="tour-nav-allocations"
+       class="{% if request.endpoint == 'allocations' %}active{% endif %}">
+        <span class="sidebar-icon">&#128279;</span> Allocations
+    </a>
+    <a href="{{ url_for('report') }}" id="tour-nav-report"
+       class="{% if request.endpoint == 'report' %}active{% endif %}">
+        <span class="sidebar-icon">&#128202;</span> Reports
+    </a>
+    <a href="{{ url_for('settings') }}" id="tour-nav-settings"
+        class="{% if request.endpoint == 'settings' %}active{% endif %}">
+        <span class="sidebar-icon">&#9881;</span> Settings
+    </a>
+    {% if current_user()['role'] == 'admin' %}
+    <div class="sidebar-section">Admin</div>
+    <a href="{{ url_for('users') }}" id="tour-nav-users"
+       class="{% if request.endpoint == 'users' %}active{% endif %}">
+        <span class="sidebar-icon">&#128100;</span> Users
+    </a>
+    <a href="{{ url_for('audit') }}" id="tour-nav-audit"
+       class="{% if request.endpoint == 'audit' %}active{% endif %}">
+        <span class="sidebar-icon">&#128221;</span> Audit Log
+    </a>
+    {% endif %}
+</aside>
+{% endif %}
+
+<!-- Main Content -->
+<main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}"><span>{{ message }}</span></div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ===== APP TOUR SYSTEM ===== -->
+{% if current_user() %}
+
+<div id="tourOvTop"    class="tour-ov-panel" style="display:none;"></div>
+<div id="tourOvBottom" class="tour-ov-panel" style="display:none;"></div>
+<div id="tourOvLeft"   class="tour-ov-panel" style="display:none;"></div>
+<div id="tourOvRight"  class="tour-ov-panel" style="display:none;"></div>
+
+<!-- Welcome Modal -->
+<div id="tourWelcomeModal" class="tour-welcome-modal" style="display:none;">
+    <div class="tour-welcome-inner">
+        <div class="tour-welcome-emoji">🎉</div>
+        <h2 class="tour-welcome-title">Welcome!</h2>
+        <p class="tour-welcome-body">Would you like a quick tour to see how to create events, manage resources, and schedule allocations?</p>
+        <p class="tour-welcome-hint">Or skip if you are already familiar.</p>
+        <div class="tour-welcome-actions">
+            <button class="tour-btn-familiar" onclick="dismissTour()">I'M FAMILIAR</button>
+            <button class="tour-btn-start" onclick="startAppTour()">START TOUR</button>
+        </div>
+    </div>
+</div>
+
+<!-- Step Tooltip -->
+<div id="tourTooltip" class="tour-tooltip" style="display:none;">
+    <div class="tour-tooltip-step" id="tourStepLabel">Step 1 of 6</div>
+    <h3 class="tour-tooltip-title" id="tourStepTitle"></h3>
+    <p class="tour-tooltip-body" id="tourStepBody"></p>
+    <div class="tour-tooltip-actions">
+        <button class="tour-btn-close-tour" onclick="closeTour()">CLOSE TOUR</button>
+        <button class="tour-btn-next" id="tourNextBtn" onclick="nextTourStep()">NEXT</button>
+    </div>
+</div>
+
+<!-- Highlight Ring -->
+<div id="tourHighlight" class="tour-highlight" style="display:none;"></div>
+
+<script>
+(function () {
+    var IS_ADMIN = '{{ current_user()["role"] }}' === 'admin';
+    var USER_ID  = '{{ current_user()["id"] }}';
+    var TOUR_KEY = 'eventsched_tour_' + USER_ID;
+
+    var baseSteps = [
+        { target:'tour-nav-dashboard',   title:'Dashboard',        body:'Your home base! See total events, resources, allocations, and upcoming schedules all in one place.',                           pos:'right' },
+        { target:'tour-nav-events',      title:'Events',           body:'Create and manage all scheduled events. Set titles, dates, times and descriptions easily.',                                     pos:'right' },
+        { target:'tour-nav-calendar',    title:'Calendar View',    body:'Visualise every event on an interactive calendar — perfect for spotting conflicts and planning ahead.',                         pos:'right' },
+        { target:'tour-nav-resources',   title:'Resources',        body:'Add rooms, instructors, and equipment. Each resource can be assigned to events without double-booking.',                        pos:'right' },
+        { target:'tour-nav-allocations', title:'Allocations',      body:'Link resources to specific events. The system automatically checks for scheduling conflicts before saving.',                    pos:'right' },
+        { target:'tour-nav-report',      title:'Reports',          body:'Generate detailed reports on event utilisation, resource allocation and scheduling summaries.',                                  pos:'right' }
+    ];
+    var adminSteps = [
+        { target:'tour-nav-users', title:'User Management', body:'Create, edit, activate or deactivate users and assign roles: Admin, Organizer, or Viewer.', pos:'right' },
+        { target:'tour-nav-audit', title:'Audit Log',       body:'Track every action — who did what and when. Full accountability at your fingertips.',        pos:'right' }
+    ];
+    var endStep = { target:'tourTriggerBtn', title:'Restart Tour Anytime', body:'Click this icon in the navbar whenever you want to revisit this tour.', pos:'bottom' };
+
+    var STEPS = baseSteps.concat(IS_ADMIN ? adminSteps : []).concat([endStep]);
+
+    var currentStep = 0;
+    var tourActive  = false;
+
+    // First login check
+    window.addEventListener('DOMContentLoaded', function () {
+        if (!localStorage.getItem(TOUR_KEY)) {
+            showOverlay(null);
+            show('tourWelcomeModal');
+        }
+    });
+
+    window.dismissTour = function () {
+        localStorage.setItem(TOUR_KEY, 'dismissed');
+        hide('tourWelcomeModal');
+        hideOverlay();
+    };
+
+    window.startAppTour = function () {
+    localStorage.setItem(TOUR_KEY, 'seen');
+    hide('tourWelcomeModal');
+    currentStep = 0;
+    tourActive  = true;
+    renderStep(0);
+    };
+
+    window.nextTourStep = function () {
+        currentStep++;
+        if (currentStep >= STEPS.length) { closeTour(); return; }
+        renderStep(currentStep);
+    };
+
+    window.closeTour = function () {
+        tourActive = false;
+        hideOverlay();
+        hide('tourTooltip');
+        hide('tourHighlight');
+        clearHighlights();
+    };
+
+    function renderStep(i) {
+        var s  = STEPS[i];
+        var el = document.getElementById(s.target);
+        ge('tourStepLabel').textContent = 'Step ' + (i+1) + ' of ' + STEPS.length;
+        ge('tourStepTitle').textContent = s.title;
+        ge('tourStepBody').textContent  = s.body;
+        ge('tourNextBtn').textContent   = (i === STEPS.length - 1) ? 'FINISH' : 'NEXT';
+        clearHighlights();
+        if (el) {
+            showOverlay(el);
+            el.classList.add('tour-highlighted');
+            positionHighlight(el);
+            positionTooltip(el, s.pos);
+        } else {
+            showOverlay(null);
+            hide('tourHighlight');
+            centerTooltip();
+        }
+    }
+
+
+    function positionHighlight(el) {
+        var r   = el.getBoundingClientRect();
+        var pad = 6;
+        var hl  = ge('tourHighlight');
+        hl.style.top    = (r.top  + window.scrollY - pad) + 'px';
+        hl.style.left   = (r.left + window.scrollX - pad) + 'px';
+        hl.style.width  = (r.width  + pad*2) + 'px';
+        hl.style.height = (r.height + pad*2) + 'px';
+        show('tourHighlight');
+    }
+
+    function positionTooltip(el, pos) {
+        var tt = ge('tourTooltip');
+        tt.style.display   = 'block';
+        tt.style.transform = '';
+        var r  = el.getBoundingClientRect();
+        var tw = tt.offsetWidth  || 310;
+        var th = tt.offsetHeight || 160;
+        var m  = 16;
+        var sy = window.scrollY, sx = window.scrollX;
+        var top, left;
+        if (pos === 'right') {
+            top  = r.top  + sy + r.height/2 - th/2;
+            left = r.right + sx + m;
+            if (left + tw > window.innerWidth - 10) left = r.left + sx - tw - m;
+        } else {
+            top  = r.bottom + sy + m;
+            left = r.left + sx + r.width/2 - tw/2;
+        }
+        top  = Math.max(sy + 8, top);
+        left = Math.max(sx + 8, Math.min(left, sx + window.innerWidth - tw - 8));
+        tt.style.top  = top  + 'px';
+        tt.style.left = left + 'px';
+    }
+
+    function centerTooltip() {
+        var tt = ge('tourTooltip');
+        tt.style.display   = 'block';
+        tt.style.top       = '50%';
+        tt.style.left      = '50%';
+        tt.style.transform = 'translate(-50%,-50%)';
+    }
+
+     function clearHighlights() {
+        document.querySelectorAll('.tour-highlighted').forEach(function(e){ e.classList.remove('tour-highlighted'); });
+    }
+
+    function showOverlay(el) {
+        if (!el) {
+            setPanel('tourOvTop', '0px', '0px', '100%', '100%');
+            hide('tourOvBottom'); hide('tourOvLeft'); hide('tourOvRight');
+            return;
+        }
+        var pad = 8, r = el.getBoundingClientRect();
+        var t = r.top-pad, b = r.bottom+pad, l = r.left-pad, ri = r.right+pad;
+        var ww = window.innerWidth, wh = window.innerHeight;
+        setPanel('tourOvTop',    '0px',  '0px',  ww+'px', Math.max(0,t)+'px');
+        setPanel('tourOvBottom', b+'px', '0px',  ww+'px', Math.max(0,wh-b)+'px');
+        setPanel('tourOvLeft',   t+'px', '0px',  Math.max(0,l)+'px', (b-t)+'px');
+        setPanel('tourOvRight',  t+'px', ri+'px',Math.max(0,ww-ri)+'px', (b-t)+'px');
+    }
+    function hideOverlay() {
+        ['tourOvTop','tourOvBottom','tourOvLeft','tourOvRight'].forEach(function(id){ hide(id); });
+    }
+    function setPanel(id,top,left,width,height) {
+        var p=ge(id); p.style.display='block';
+        p.style.top=top; p.style.left=left; p.style.width=width; p.style.height=height;
+    }
+    function show(id) { ge(id).style.display = 'flex'; }
+    function hide(id) { ge(id).style.display = 'none'; }
+    function ge(id)   { return document.getElementById(id); }
+
+    window.addEventListener('resize', function(){ if(tourActive) renderStep(currentStep); });
+})();
+</script>
+{% endif %}
+<!-- ===== END TOUR ===== -->
+
+</body>
+</html>

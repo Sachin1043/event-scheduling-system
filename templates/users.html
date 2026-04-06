@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">User Management</div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for u in users %}
+            <tr>
+                <td class="primary">{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td><span class="badge badge-{{ u.role }}">{{ u.role }}</span></td>
+                <td>
+                    <span class="badge {{ 'badge-active' if u.is_active else 'badge-inactive' }}">
+                        {{ 'Active' if u.is_active else 'Inactive' }}
+                    </span>
+                </td>
+                <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <div class="btn-group">
+                        <!-- Edit Role inline -->
+                        <form method="POST"
+                              action="{{ url_for('edit_user', user_id=u.id) }}"
+                              style="display:flex;gap:4px;align-items:center">
+                            <input type="hidden" name="username" value="{{ u.username }}">
+                            <input type="hidden" name="email" value="{{ u.email }}">
+                            <select name="role" style="padding:4px 8px;font-size:12px;
+                                border:1px solid var(--border);border-radius:4px">
+                                <option value="admin"
+                                    {{ 'selected' if u.role == 'admin' }}>Admin</option>
+                                <option value="organizer"
+                                    {{ 'selected' if u.role == 'organizer' }}>Organizer</option>
+                                <option value="viewer"
+                                    {{ 'selected' if u.role == 'viewer' }}>Viewer</option>
+                            </select>
+                            <button type="submit" class="btn btn-ghost btn-sm">
+                                Save
+                            </button>
+                        </form>
+
+                        <!-- Toggle Active -->
+                        {% if u.id != current_user()['id'] %}
+                        <form method="POST"
+                              action="{{ url_for('toggle_user', user_id=u.id) }}">
+                            <button type="submit"
+                                    class="btn btn-sm {{ 'btn-warning' if u.is_active else 'btn-success' }}"
+                                    onclick="return confirm('Toggle user status?')">
+                                {{ 'Deactivate' if u.is_active else 'Activate' }}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128100;</div>
+                        <h3>No users found</h3>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

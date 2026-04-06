@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+
+<div style="text-align:center;padding:80px 24px">
+    <div style="font-size:72px;font-weight:700;color:var(--border)">404</div>
+    <h2 style="font-size:24px;font-weight:600;color:var(--text);margin:12px 0 8px">
+        Page Not Found
+    </h2>
+    <p style="color:var(--text-muted);margin-bottom:24px">
+        The page you are looking for does not exist or you do not have permission to view it.
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+        Go to Dashboard
+    </a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Event{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">{{ action }} Event</div>
+    <a href="{{ url_for('events') }}" class="btn btn-ghost">Back to Events</a>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="title">Event Title *</label>
+            <input type="text" id="title" name="title"
+                   placeholder="Enter event title"
+                   value="{{ form_data.title if form_data else (event.title if event else '') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description"
+                      placeholder="Optional description">{{ form_data.description if form_data else (event.description if event else '') }}</textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start_time">Start Time *</label>
+                <input type="datetime-local" id="start_time" name="start_time"
+                       value="{{ form_data.start_time if form_data else (event.start_time.strftime('%Y-%m-%dT%H:%M') if event else '') }}"
+                       required>
+            </div>
+            <div class="form-group">
+                <label for="end_time">End Time *</label>
+                <input type="datetime-local" id="end_time" name="end_time"
+                       value="{{ form_data.end_time if form_data else (event.end_time.strftime('%Y-%m-%dT%H:%M') if event else '') }}"
+                       required>
+            </div>
+        </div>
+
+        {% set sel_tz = form_data.timezone if form_data else (event.timezone if event else 'UTC') %}
+        <div class="form-group">
+            <label for="timezone">Timezone</label>
+            <select id="timezone" name="timezone">
+                <option value="UTC"                  {{ 'selected' if sel_tz == 'UTC' }}>UTC</option>
+                <option value="Asia/Kolkata"         {{ 'selected' if sel_tz == 'Asia/Kolkata' }}>Asia/Kolkata (IST)</option>
+                <option value="America/New_York"     {{ 'selected' if sel_tz == 'America/New_York' }}>America/New_York (EST)</option>
+                <option value="America/Los_Angeles"  {{ 'selected' if sel_tz == 'America/Los_Angeles' }}>America/Los_Angeles (PST)</option>
+                <option value="Europe/London"        {{ 'selected' if sel_tz == 'Europe/London' }}>Europe/London (GMT)</option>
+                <option value="Asia/Dubai"           {{ 'selected' if sel_tz == 'Asia/Dubai' }}>Asia/Dubai (GST)</option>
+            </select>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+                {{ action }} Event
+            </button>
+            <a href="{{ url_for('events') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

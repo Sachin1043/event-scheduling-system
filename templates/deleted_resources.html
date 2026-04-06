@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Deleted Resources{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">Deleted Resources</div>
+    <a href="{{ url_for('resources') }}" class="btn btn-ghost">
+        Back to Resources
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Capacity</th>
+                    <th>Location</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in resources %}
+            <tr style="opacity:0.75">
+                <td class="primary">{{ r.name }}</td>
+                <td>
+                    <span class="badge badge-{{ r.resource_type }}">
+                        {{ r.resource_type }}
+                    </span>
+                </td>
+                <td>{{ r.capacity }}</td>
+                <td style="color:var(--text-muted)">{{ r.location or '—' }}</td>
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('restore_resource_route', resource_id=r.id) }}">
+                        <button type="submit" class="btn btn-success btn-sm"
+                                onclick="return confirm('Restore this resource?')">
+                            Restore
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#10003;</div>
+                        <h3>No deleted resources</h3>
+                        <p>Everything is active.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

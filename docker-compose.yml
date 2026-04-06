@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: event_scheduler
+      MYSQL_USER: scheduler_user
+      MYSQL_PASSWORD: scheduler_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: scheduler_user
+      DB_PASSWORD: scheduler_pass
+      DB_NAME: event_scheduler
+      SECRET_KEY: change-this-in-production
+      FLASK_DEBUG: "0"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

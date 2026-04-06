@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Allocations{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">All Allocations</div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Resource</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Attendees</th>
+                    <th>Event Date</th>
+                    <th>Allocated By</th>
+                    {% if current_user()['role'] in ['admin','organizer'] %}
+                    <th>Action</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for a in allocations %}
+            <tr>
+                <td class="primary">
+                    <a href="{{ url_for('event_detail', event_id=a.event_id) }}">
+                        {{ a.event_title }}
+                    </a>
+                </td>
+                <td>{{ a.resource_name }}</td>
+                <td>
+                    <span class="badge badge-{{ a.resource_type }}">
+                        {{ a.resource_type }}
+                    </span>
+                </td>
+                <td>{{ a.quantity_needed }}</td>
+                <td>{{ a.attendees_count }}</td>
+                <td>{{ a.event_start.strftime('%Y-%m-%d') }}</td>
+                <td style="color:var(--text-muted)">
+                    {{ a.allocated_by_name or '—' }}
+                </td>
+                {% if current_user()['role'] in ['admin','organizer'] %}
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('delete_allocation_route', alloc_id=a.id) }}">
+                        <input type="hidden" name="event_id" value="{{ a.event_id }}">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Remove this allocation?')">
+                            Remove
+                        </button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128279;</div>
+                        <h3>No allocations yet</h3>
+                        <p>Allocate resources from an event's detail page.</p>
+                        <a href="{{ url_for('events') }}" class="btn btn-ghost">
+                            View Events
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

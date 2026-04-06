@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Resource{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">{{ action }} Resource</div>
+    <a href="{{ url_for('resources') }}" class="btn btn-ghost">Back to Resources</a>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="name">Resource Name *</label>
+            <input type="text" id="name" name="name"
+                   placeholder="e.g. Conference Room A"
+                   value="{{ resource.name if resource else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="resource_type">Resource Type *</label>
+            <select id="resource_type" name="resource_type" required>
+                <option value="">-- Select Type --</option>
+                <option value="room"
+                    {{ 'selected' if resource and resource.resource_type == 'room' }}>
+                    Room
+                </option>
+                <option value="instructor"
+                    {{ 'selected' if resource and resource.resource_type == 'instructor' }}>
+                    Instructor
+                </option>
+                <option value="equipment"
+                    {{ 'selected' if resource and resource.resource_type == 'equipment' }}>
+                    Equipment
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="capacity">Capacity / Quantity *</label>
+            <input type="number" id="capacity" name="capacity" min="1"
+                   value="{{ resource.capacity if resource else 1 }}" required>
+            <div class="form-hint">
+                Rooms: max attendees &nbsp;|&nbsp;
+                Equipment: total units available &nbsp;|&nbsp;
+                Instructor: always 1
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location"
+                   placeholder="e.g. Block A, Floor 2"
+                   value="{{ resource.location if resource else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description"
+                      placeholder="Optional description">{{ resource.description if resource else '' }}</textarea>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+                {{ action }} Resource
+            </button>
+            <a href="{{ url_for('resources') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

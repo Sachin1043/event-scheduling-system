@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title">Weekly Calendar</div>
+</div>
+
+<div class="calendar-nav">
+    <a href="{{ url_for('calendar', week=week_offset - 1) }}"
+       class="btn btn-ghost">&#8592; Previous</a>
+    <a href="{{ url_for('calendar', week=0) }}"
+       class="btn btn-ghost">Today</a>
+    <a href="{{ url_for('calendar', week=week_offset + 1) }}"
+       class="btn btn-ghost">Next &#8594;</a>
+    <div class="calendar-title">
+        {{ week_start.strftime('%B %d') }} —
+        {{ week_end.strftime('%B %d, %Y') }}
+    </div>
+</div>
+
+<div class="calendar-grid">
+    <!-- Day Headers -->
+    {% for day in week_days %}
+    <div class="calendar-day-header">
+        {{ day.strftime('%a') }}<br>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">
+            {{ day.strftime('%d') }}
+        </span>
+    </div>
+    {% endfor %}
+
+    <!-- Day Cells -->
+    {% for day in week_days %}
+    <div class="calendar-day {% if day.date() == today.date() %}today{% endif %}">
+        {% for event in events %}
+            {% if event.start_time.date() == day.date() %}
+            <a href="{{ url_for('event_detail', event_id=event.id) }}"
+               class="calendar-event"
+               title="{{ event.title }} — {{ event.start_time.strftime('%H:%M') }} to {{ event.end_time.strftime('%H:%M') }}">
+                {{ event.start_time.strftime('%H:%M') }} {{ event.title }}
+            </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
