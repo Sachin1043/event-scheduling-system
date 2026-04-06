@@ -59,7 +59,7 @@ A full-featured **Event Scheduling and Resource Allocation** web application bui
 | Login        | ![Login](screenshots/login.jpeg)               |
 | Dashboard    | ![Dashboard](screenshots/dashboard.jpeg)       |
 | Events       | ![Events](screenshots/events.jpeg)             |
-| Event Detail | ![Event Detail](screenshots/event_detail.jpeg) |
+| Event Detail | ![Event Detail](event_detail.jpeg) |
 | Resources    | ![Resources](screenshots/resources.jpeg)       |
 | Calendar     | ![Calendar](screenshots/calendar.jpeg)         |
 | Report       | ![Report](screenshots/reports.jpeg)            |
