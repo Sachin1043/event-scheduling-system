@@ -2,6 +2,7 @@
 
 A full-featured **Event Scheduling and Resource Allocation** web application built with **Python/Flask** and **MySQL**. The system supports multi-role user management, event CRUD, resource tracking with real-time availability, an intelligent **conflict-detection engine**, weekly calendar views, utilisation reports with CSV export, and a complete REST API — all wrapped in a modern, dark-themed UI.
 
+[![Event Scheduling Demo](https://raw.githubusercontent.com/Sachin1043/event-scheduling-system/main/screenshots/dashboard.jpeg)](https://drive.google.com/file/d/154w41FlCGjsuzQDUIkQSH6DgRGflfgLw/view?usp=drive_link)
 ---
 
 ## 📑 Table of Contents
