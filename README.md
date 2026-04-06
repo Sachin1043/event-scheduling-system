@@ -22,14 +22,32 @@ A web application built with Python, Flask, and MySQL to manage events, allocate
 
 ## Screenshots
 
-* [Login Screen](screenshots/login.jpeg)
-* [Dashboard](screenshots/dashboard.jpeg)
-* [Events](screenshots/events.jpeg) | [Event Detail](event_detail.jpeg)
-* [Resources](screenshots/resources.jpeg)
-* [Calendar](screenshots/calendar.jpeg)
-* [Reports](screenshots/reports.jpeg)
-* [Audit Logs](screenshots/audit.jpeg)
-* [Settings](screenshots/settings.jpeg)
+**Login Screen**
+![Login Screen](screenshots/login.jpeg)
+
+**Dashboard**
+![Dashboard](screenshots/dashboard.jpeg)
+
+**Events**
+![Events](screenshots/events.jpeg)
+
+**Event Detail**
+![Event Detail](event_detail.jpeg)
+
+**Resources**
+![Resources](screenshots/resources.jpeg)
+
+**Calendar**
+![Calendar](screenshots/calendar.jpeg)
+
+**Reports**
+![Reports](screenshots/reports.jpeg)
+
+**Audit Logs**
+![Audit Logs](screenshots/audit.jpeg)
+
+**Settings**
+![Settings](screenshots/settings.jpeg)
 
 ## Getting Started
 
