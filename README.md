@@ -4,7 +4,7 @@ A web application built with Python, Flask, and MySQL to manage events, allocate
 
 [Watch the Demo Video](https://drive.google.com/file/d/154w41FlCGjsuzQDUIkQSH6DgRGflfgLw/view?usp=drive_link)
 
-## ✨ Features
+## Features
 
 * **Role-Based Access:** Secure login with `admin`, `organizer`, and `viewer` roles.
 * **Event & Resource Management:** Full CRUD operations for events, rooms, instructors, and equipment.
@@ -20,20 +20,17 @@ A web application built with Python, Flask, and MySQL to manage events, allocate
 * **Frontend:** HTML, CSS, Jinja2
 * **Deployment:** Docker, Docker Compose
 
-## 🔄 System Workflow
+## How It Works
 
-Here is how the application works step-by-step:
+Here is a quick rundown of the app's flow:
 
-1. **System Setup:** The `admin` logs in and adds resources to the system (e.g., Conference Rooms, Projectors, Instructors).
-2. **User Authentication:** Users log in. Their access level determines what they can see and do (`admin`, `organizer`, or `viewer`).
-3. **Event Creation:** An `organizer` selects a date, time, and resource, then submits a request to schedule an event.
-4. **Conflict Checking:** The system instantly checks if the requested room or resource is already booked for that specific time.
-   * *If clear:* The event is scheduled successfully and added to the database.
-   * *If double-booked:* The system stops the booking, shows a conflict error, and prompts the user to pick a different time or room.
-5. **Tracking & Viewing:** Users can check the weekly calendar to see a visual layout of all scheduled events and available slots. 
-6. **Reporting:** Admins and organizers can generate CSV reports of how often resources are used, and admins can check the audit logs to track user activity.
+1. **Setup:** An `admin` logs in first to add resources into the system (like conference rooms, projectors, or guest speakers).
+2. **Booking:** An `organizer` logs in, picks a date and time, and tries to book a room for an event.
+3. **The Conflict Check:** Before saving, the app double-checks if that room or equipment is already taken. If it is, it throws an error and makes the user pick another time. If it's free, the event is saved to the database.
+4. **Viewing the Schedule:** Users can pull up the weekly calendar view to easily see what is booked and what is available.
+5. **Admin Tracking:** Admins can download CSV reports to see how often certain rooms are being used, or check the audit logs to see exactly who did what.
 
-## 📸 Screenshots
+## Screenshots
 
 **Login Screen**
 ![Login Screen](screenshots/login.jpeg)
@@ -62,7 +59,7 @@ Here is how the application works step-by-step:
 **Settings**
 ![Settings](screenshots/settings.jpeg)
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 Make sure you have Python 3.x and MySQL installed on your system.
